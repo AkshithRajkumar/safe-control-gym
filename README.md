@@ -63,3 +63,4 @@ python3 final_project.py --overrides ./getting_started.yaml
 
 -----
 > University of Toronto's [Dynamic Systems Lab](https://github.com/utiasDSL) / [Vector Institute for Artificial Intelligence](https://github.com/VectorInstitute)
+# safe-control-gym

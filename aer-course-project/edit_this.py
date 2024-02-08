@@ -136,12 +136,25 @@ class Controller():
             waypoints = [(self.initial_obs[0], self.initial_obs[2], self.initial_obs[4])]
 
         # Example code: hardcode waypoints 
-        waypoints.append((-0.5, -3.0, 2.0))
-        waypoints.append((-0.5, -2.0, 2.0))
-        waypoints.append((-0.5, -1.0, 2.0))
-        waypoints.append((-0.5,  0.0, 2.0))
-        waypoints.append((-0.5,  1.0, 2.0))
-        waypoints.append((-0.5,  2.0, 2.0))
+        # waypoints.append((-0.5, -3.0, 2.0))
+        # waypoints.append((-0.5, -2.0, 2.0))
+        # waypoints.append((-0.5, -1.0, 2.0))
+        # waypoints.append((-0.5,  0.0, 2.0))
+        # waypoints.append((-0.5,  1.0, 2.0))
+        # waypoints.append((-0.5,  2.0, 2.0))
+        radius = 1.0
+        center_x, center_y, center_z = 0, -3, 1
+        duration = 15
+        num_waypoints = int(duration * self.CTRL_FREQ)
+
+        t_scaled = np.linspace(0, 2*np.pi, num_waypoints)
+        waypoints = np.array([
+            center_x + radius * np.cos(t_scaled),
+            center_y + radius * np.sin(t_scaled),
+            center_z * np.ones_like(t_scaled)
+        ]).T.tolist()
+        
+        
         waypoints.append([initial_info["x_reference"][0], initial_info["x_reference"][2], initial_info["x_reference"][4]])
 
         # Polynomial fit.
