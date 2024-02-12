@@ -122,11 +122,12 @@ class GeoController():
         # self.ActualPosY.append(Actualp[1])
         # self.ActualPosZ.append(Actualp[2])
         # self.ActualPosYaw.append(Actualp[3])
+        # print(AcrualYaw, Desiredp)
         self.writer1.writerow([
             Actualp[0] - Desiredp[0],
             Actualp[1] - Desiredp[1],
             Actualp[2] - Desiredp[2],
-            AcrualYaw - Desiredp,
+            AcrualYaw - DesiredYaw,
             Desiredp[0],
             Desiredp[1],
             Desiredp[2],
