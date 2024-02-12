@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from scipy.spatial.transform import Rotation
 from enum import Enum
 from functools import wraps
+import csv
 
 class GeoController():
     """Geometric control class for Crazyflies.
@@ -49,6 +50,47 @@ class GeoController():
         self.MIXER_MATRIX = np.array([[.5, -.5, 1], [.5, .5, -1], [-.5, .5, 1], [-.5, -.5, -1]])
         self.reset()
 
+        self.file1 = open('AcPos.csv', mode='w', newline='')
+        self.writer1 = csv.writer(self.file1)
+        self.writer1.writerow(["Errx", "ErrY",  "ErrZ", "ErrYaw", "DesPosX","DesPosY","DesPosZ","DesYaw", "AcPosX","AcPosY","AcPosZ","AcYaw"])
+
+        # self.function_calls = 0
+        # self.pos_errX = []
+        # self.desiredPosX = []
+        # self.ActualPosX = []
+
+        # self.pos_errY = []
+        # self.desiredPosY = []
+        # self.ActualPosY = []
+
+        # self.pos_errZ = []
+        # self.desiredPosZ = []
+        # self.ActualPosZ = []
+
+        # self.pos_errYaw = []
+        # self.desiredPosYaw = []
+        # self.ActualPosYaw = []
+
+        # self.x_val = []
+
+        # self.fig1, self.ax1 = plt.subplots()
+        # self.line1, = self.ax1.plot(self.x_val, self.pos_errX, marker='o', linestyle='-', label = 'Err X')
+        # self.line2, = self.ax1.plot(self.x_val, self.pos_errY, marker='o', linestyle='-', label = 'Err Y')
+        # self.line3, = self.ax1.plot(self.x_val, self.pos_errZ, marker='o', linestyle='-', label = 'Err Z')
+        # self.line4, = self.ax1.plot(self.x_val, self.pos_errYaw, marker='o', linestyle='-', label = 'Err Yaw')
+        # self.ax1.set_xlabel('Time')
+        # self.ax1.set_ylabel('Error')
+        # self.ax1.set_title('Error v/s Time')
+
+        # self.fig2, self.ax2 = plt.subplots()
+        # self.line5, = self.ax2.plot(self.x_val, self.pos_errX, marker='o', linestyle='-', label = 'Err X')
+        # self.line6, = self.ax2.plot(self.x_val, self.pos_errY, marker='o', linestyle='-', label = 'Err Y')
+        # self.line7, = self.ax3.plot(self.x_val, self.pos_errZ, marker='o', linestyle='-', label = 'Err Z')
+        # self.line8, = self.ax4.plot(self.x_val, self.pos_errYaw, marker='o', linestyle='-', label = 'Err Yaw')
+        # self.ax2.set_xlabel('Time')
+        # self.ax2.set_ylabel('Actual v/s desired X')
+        # self.ax2.set_title('Error v/s Time')
+
     def reset(self):
         """Resets the control classes.
 
@@ -61,6 +103,43 @@ class GeoController():
         self.integral_pos_e = np.zeros(3)
         self.last_rpy_e = np.zeros(3)
         self.integral_rpy_e = np.zeros(3)
+    
+    def plot_error_graph(self, Actualp, Desiredp, DesiredYaw, AcrualYaw):
+        # self.function_calls += 1
+        # self.x_val.append(self.function_calls)
+        # Error = Actualp - Desiredp
+        # self.pos_errX.append(Error[0])
+        # self.pos_errY.append(Error[1])
+        # self.pos_errZ.append(Error[2])
+        # self.pos_errYaw.append(Error[3])
+
+        # self.desiredPosX.append(Desiredp[0])
+        # self.desiredPosY.append(Desiredp[1])
+        # self.desiredPosZ.append(Desiredp[2])
+        # self.desiredPosYaw.append(Desiredp[3])
+
+        # self.ActualPosX.append(Actualp[0])
+        # self.ActualPosY.append(Actualp[1])
+        # self.ActualPosZ.append(Actualp[2])
+        # self.ActualPosYaw.append(Actualp[3])
+        self.writer1.writerow([
+            Actualp[0] - Desiredp[0],
+            Actualp[1] - Desiredp[1],
+            Actualp[2] - Desiredp[2],
+            AcrualYaw - Desiredp,
+            Desiredp[0],
+            Desiredp[1],
+            Desiredp[2],
+            DesiredYaw,
+            Actualp[0],
+            Actualp[1],
+            Actualp[2],
+            AcrualYaw])
+
+
+
+
+
 
     def compute_control(self,
                         control_timestep,
@@ -130,7 +209,7 @@ class GeoController():
         # tracking errors
         pos_e = target_pos - cur_pos
         vel_e = target_vel - cur_vel
-
+        
         # You should compute a proper desired_thrust and desired_euler
         # such that the circle trajectory can be tracked
         desired_thrust = 0
@@ -169,6 +248,8 @@ class GeoController():
 
         desired_euler = (Rotation.from_matrix(Rdes)).as_euler('xyz',degrees= False)
         # print(desired_euler)
+        cur_rpy = p.getEulerFromQuaternion(cur_quat)
+        self.plot_error_graph(cur_pos, target_pos,reference_yaw, cur_rpy[2])
 
         return desired_thrust, desired_euler, pos_e
 
