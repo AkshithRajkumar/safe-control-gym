@@ -54,43 +54,6 @@ class GeoController():
         self.writer1 = csv.writer(self.file1)
         self.writer1.writerow(["Errx", "ErrY",  "ErrZ", "ErrYaw", "DesPosX","DesPosY","DesPosZ","DesYaw", "AcPosX","AcPosY","AcPosZ","AcYaw"])
 
-        # self.function_calls = 0
-        # self.pos_errX = []
-        # self.desiredPosX = []
-        # self.ActualPosX = []
-
-        # self.pos_errY = []
-        # self.desiredPosY = []
-        # self.ActualPosY = []
-
-        # self.pos_errZ = []
-        # self.desiredPosZ = []
-        # self.ActualPosZ = []
-
-        # self.pos_errYaw = []
-        # self.desiredPosYaw = []
-        # self.ActualPosYaw = []
-
-        # self.x_val = []
-
-        # self.fig1, self.ax1 = plt.subplots()
-        # self.line1, = self.ax1.plot(self.x_val, self.pos_errX, marker='o', linestyle='-', label = 'Err X')
-        # self.line2, = self.ax1.plot(self.x_val, self.pos_errY, marker='o', linestyle='-', label = 'Err Y')
-        # self.line3, = self.ax1.plot(self.x_val, self.pos_errZ, marker='o', linestyle='-', label = 'Err Z')
-        # self.line4, = self.ax1.plot(self.x_val, self.pos_errYaw, marker='o', linestyle='-', label = 'Err Yaw')
-        # self.ax1.set_xlabel('Time')
-        # self.ax1.set_ylabel('Error')
-        # self.ax1.set_title('Error v/s Time')
-
-        # self.fig2, self.ax2 = plt.subplots()
-        # self.line5, = self.ax2.plot(self.x_val, self.pos_errX, marker='o', linestyle='-', label = 'Err X')
-        # self.line6, = self.ax2.plot(self.x_val, self.pos_errY, marker='o', linestyle='-', label = 'Err Y')
-        # self.line7, = self.ax3.plot(self.x_val, self.pos_errZ, marker='o', linestyle='-', label = 'Err Z')
-        # self.line8, = self.ax4.plot(self.x_val, self.pos_errYaw, marker='o', linestyle='-', label = 'Err Yaw')
-        # self.ax2.set_xlabel('Time')
-        # self.ax2.set_ylabel('Actual v/s desired X')
-        # self.ax2.set_title('Error v/s Time')
-
     def reset(self):
         """Resets the control classes.
 
@@ -105,24 +68,9 @@ class GeoController():
         self.integral_rpy_e = np.zeros(3)
     
     def plot_error_graph(self, Actualp, Desiredp, DesiredYaw, AcrualYaw):
-        # self.function_calls += 1
-        # self.x_val.append(self.function_calls)
-        # Error = Actualp - Desiredp
-        # self.pos_errX.append(Error[0])
-        # self.pos_errY.append(Error[1])
-        # self.pos_errZ.append(Error[2])
-        # self.pos_errYaw.append(Error[3])
-
-        # self.desiredPosX.append(Desiredp[0])
-        # self.desiredPosY.append(Desiredp[1])
-        # self.desiredPosZ.append(Desiredp[2])
-        # self.desiredPosYaw.append(Desiredp[3])
-
-        # self.ActualPosX.append(Actualp[0])
-        # self.ActualPosY.append(Actualp[1])
-        # self.ActualPosZ.append(Actualp[2])
-        # self.ActualPosYaw.append(Actualp[3])
-        # print(AcrualYaw, Desiredp)
+        """
+        Update csv file with the values collected at each iteration
+        """
         self.writer1.writerow([
             Actualp[0] - Desiredp[0],
             Actualp[1] - Desiredp[1],
@@ -213,43 +161,48 @@ class GeoController():
         
         # You should compute a proper desired_thrust and desired_euler
         # such that the circle trajectory can be tracked
+
+        # declare variables for thrust and euler
         desired_thrust = 0
         desired_euler = np.zeros(3)
+
+        # gain values for position and velocity
         kp = 5.3          ##tuning
         kv = 5.3              ##tuning
         #---------Tip 1: Compute the desired acceration command--------#
+
+        # defining kpos and kvel using the constant declared above
         Kpos  = np.array([[kp,0,0],[0,kp,0],[0,0,kp]])
         Kvel  = np.array([[kv,0,0],[0,kv,0],[0,0,kv]])
-        # print("Kconstants",Kpos, Kvel)
-        # print("pos_",pos_e.shape, vel_e.shape)
+
+        # calculating a_fb
         afb = np.dot(Kpos, pos_e.reshape(3,1)) + np.dot(Kvel ,vel_e.reshape(3,1))
-        # print("afb",afb,afb.shape)
+
+        # defining gravity
         gr= np.array([0,0,self.grav])
-        # print("target", target_acc.shape)
+
+        # calculating a_des
         ades = afb + target_acc.reshape(3,1) + gr.reshape(3,1)
-        # print("ades",ades,target_acc, gr)
         #---------Tip 2: Compute the desired thrust command--------#
         
         desired_thrust = self.mass * np.linalg.norm(ades)
-        # print("desthrust", desired_thrust)
         #---------Tip 3: Compute the desired attitude command--------#
 
-        # xc = np.array([[math.cos(reference_yaw)], [math.sin(reference_yaw)], [0]]
+        # calculating xB,yB,zB and stacking them to create a rotational matrix.
+        # Further using it to computing euler angles
+        # using inbuilt function function
         yc = np.array([-1 * math.sin(reference_yaw), math.cos(reference_yaw), 0])
-        # print("yc", yc, yc.shape)
         zBdes = ades/np.linalg.norm(ades)
-        # print("zBdes",zBdes,zBdes.shape)
         xBDesNum = np.cross(yc.reshape(1,3), zBdes.reshape(1,3))
         xBdes = xBDesNum/np.linalg.norm(xBDesNum)
-        # print("xBdes",xBdes,xBdes.shape)
         yBdes = np.cross(zBdes.reshape(1,3), xBdes.reshape(1,3))
-        # print("yBdes",yBdes, yBdes.shape)
         Rdes = np.vstack((xBdes,yBdes,zBdes.reshape(1,3))).T
-        # print(Rdes,Rdes.shape)
 
         desired_euler = (Rotation.from_matrix(Rdes)).as_euler('xyz',degrees= False)
-        # print(desired_euler)
+
+        # using current quaternion to calculate current yaw
         cur_rpy = p.getEulerFromQuaternion(cur_quat)
+        # log this data into a csv to plot graph from
         self.plot_error_graph(cur_pos, target_pos,reference_yaw, cur_rpy[2])
 
         return desired_thrust, desired_euler, pos_e
