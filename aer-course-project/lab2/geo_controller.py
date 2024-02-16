@@ -1,3 +1,4 @@
+# Team : Akhil Jarodia, Akshith Rajkumar, Huong Lan Tran
 import os
 import math
 import time
